@@ -1,0 +1,162 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream> 
+
+using namespace std;
+
+
+class Product {
+public:
+    string name;
+    double price;
+    int quantity;
+
+   
+    Product(string n = "", double p = 0.0, int q = 0) : name(n), price(p), quantity(q) {}
+};
+
+
+class Cart {
+private:
+    vector<Product> items; 
+
+public:
+    
+    void addProduct(const Product& product) {
+        items.push_back(product); 
+        cout << product.name << " added to cart.\n";
+    }
+
+    
+    void viewCart() const {
+        if (items.empty()) {
+            cout << "Your cart is empty.\n";
+        } else {
+            cout << "Items in your cart:\n";
+            double total = 0.0;
+            for (const auto& item : items) {
+                cout << item.name << " - $" << item.price << " x " << item.quantity << "\n";
+                total += item.price * item.quantity;
+            }
+            cout << "Total: $" << total << "\n";
+        }
+    }
+
+   
+    void saveCartToFile(const string& filename) const {
+        ofstream outFile(filename); 
+        if (outFile.is_open()) {
+            for (const auto& item : items) {
+                outFile << item.name << "," << item.price << "," << item.quantity << "\n";
+            }
+            outFile.close();
+            cout << "Cart saved to " << filename << ".\n";
+        } else {
+            cout << "Unable to save cart to file.\n";
+        }
+    }
+
+    
+    void loadCartFromFile(const string& filename) {
+        ifstream inFile(filename); 
+        if (inFile.is_open()) {
+            items.clear(); 
+            string line;
+            while (getline(inFile, line)) {
+                size_t pos1 = line.find(",");
+                size_t pos2 = line.find(",", pos1 + 1);
+                string name = line.substr(0, pos1);
+                double price = stod(line.substr(pos1 + 1, pos2 - pos1 - 1));
+                int quantity = stoi(line.substr(pos2 + 1));
+                items.push_back(Product(name, price, quantity)); 
+            }
+            inFile.close();
+            cout << "Cart loaded from " << filename << ".\n";
+        } else {
+            cout << "Unable to load cart from file.\n";
+        }
+    }
+};
+
+
+int main() {
+   
+    Product* p1 = new Product("Laptop", 1200.50, 1); 
+    Product* p2 = new Product("Smartphone", 800.00, 2); 
+    Product* p3 = new Product("Headphones", 150.00, 1); 
+
+    
+    Cart cart;
+
+    int choice;
+    do {
+        
+        cout << "\nWelcome to ezzyshopbd!\n";
+        cout << "1. View Products\n";
+        cout << "2. Add Product to Cart\n";
+        cout << "3. View Cart\n";
+        cout << "4. Save Cart to File\n";
+        cout << "5. Load Cart from File\n";
+        cout << "6. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                
+                cout << "\nAvailable Products:\n";
+                cout << "1. " << p1->name << " - $" << p1->price << "\n";
+                cout << "2. " << p2->name << " - $" << p2->price << "\n";
+                cout << "3. " << p3->name << " - $" << p3->price << "\n";
+                break;
+
+            case 2:
+               
+                int productChoice;
+                cout << "Enter product number to add to cart (1-3): ";
+                cin >> productChoice;
+
+                if (productChoice == 1) {
+                    cart.addProduct(*p1); 
+                } else if (productChoice == 2) {
+                    cart.addProduct(*p2);
+                } else if (productChoice == 3) {
+                    cart.addProduct(*p3);
+                } else {
+                    cout << "Invalid choice.\n";
+                }
+                break;
+
+            case 3:
+                
+                cart.viewCart();
+                break;
+
+            case 4:
+                
+                cart.saveCartToFile("cart.txt");
+                break;
+
+            case 5:
+                
+                cart.loadCartFromFile("cart.txt");
+                break;
+
+            case 6:
+               
+                cout << "Thank you for shopping with ezzyshopbd!\n";
+                break;
+
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 6);
+
+    
+    delete p1;
+    delete p2;
+    delete p3;
+
+    return 0;
+}
